@@ -278,6 +278,7 @@ jobs:
         run: |
           conda install --yes --quiet --use-local python=${{ matrix.python-version }} bokeh $(python scripts/deps.py run test)
           python -c 'import yaml; print(yaml)'
+          python -c 'import bokeh; print(bokeh)'
 
       - name: Cache node modules
         uses: actions/cache@v1
@@ -305,6 +306,7 @@ jobs:
           pushd bokehjs
           echo "$PATH"
           python -c 'import yaml; print(yaml)'
+          python -c 'import bokeh; print(bokeh)'
           node make test:size
           node make test:unit
           node make test:integration
