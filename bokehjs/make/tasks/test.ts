@@ -14,7 +14,7 @@ import * as paths from "../paths"
 
 async function is_available(port: number): Promise<boolean> {
   const host = "0.0.0.0"
-  const timeout = 1000
+  const timeout = 10000
 
   return new Promise((resolve, reject) => {
     const socket = new Socket()
