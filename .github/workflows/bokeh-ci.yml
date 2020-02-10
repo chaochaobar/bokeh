@@ -305,7 +305,10 @@ jobs:
           pushd bokehjs
           echo "$PATH"
           python -c 'import yaml; print(yaml)'
-          node make test
+          node make test:size
+          node make test:unit
+          node make test:integration
+          #node make test
           popd
 
       - name: Collect results
