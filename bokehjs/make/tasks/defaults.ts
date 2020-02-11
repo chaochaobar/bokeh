@@ -1,12 +1,19 @@
 import {spawn} from "child_process"
-import {join} from "path"
+import {join, delimiter} from "path"
+
+import which from "which"
 
 import {task, log} from "../task"
 import {build_dir} from "../paths"
 
 task("defaults:generate", () => {
   const script = join(__dirname, 'generate_defaults.py')
-  const proc = spawn("python", [script, build_dir.test], {stdio: "pipe"})
+  const python = which.sync("python")
+  console.log("XXX", python)
+  for (const p of (process.env.PATH ?? "").split(delimiter)) {
+    console.log(p)
+  }
+  const proc = spawn(python, [script, build_dir.test], {stdio: "pipe"})
   proc.stdout.on("data", (data) => {
     ("" + data)
       .split('\n')
