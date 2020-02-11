@@ -214,34 +214,22 @@ jobs:
             ./Miniconda3-latest-Windows-x86_64.exe //InstallationType=JustMe //RegisterPython=0 //S
           fi
 
-      - name: Setup paths
+      - name: Setup paths (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          echo "::add-path::$HOME\miniconda3"
+          echo "::add-path::$HOME\miniconda3\DLLs"
+          echo "::add-path::$HOME\miniconda3\Scripts"
+          echo "::add-path::$HOME\miniconda3\Library\bin"
+          echo "::add-path::$HOME\miniconda3\Library\usr\bin"
+          echo "::add-path::$HOME\miniconda3\Library\mingw-w64\bin"
+
+      - name: Setup paths (Linux or macOS)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
-          echo "$PATH"
-
-          case "${{ runner.os }}" in
-            "Windows")
-              which $HOME/AppData/Local/Google/Chrome/Application/chrome.exe || true
-              which /c/Program\ Files\ \(x86\)/Google/Application/chrome.exe || true
-              which /c/Program\ Files\ \(x86\)/Google/Chrome/Application/chrome.exe || true
-              which /c/Program\ Files\ \(x86\)/Google/Chrome/Application/Chrome.exe || true
-              ;;
-            "macOS")
-              which /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome
-              which /Applications/Google\ Chrome.app/Contents/MacOS/google\ chrome
-              ;;
-            "Linux")
-              which /usr/bin/google-chrome
-              ;;
-          esac
-
-          if [[ "${{ runner.os }}" = "Windows" ]]; then
-            echo "::add-path::$HOME/miniconda3"
-            echo "::add-path::$HOME/miniconda3/DLLs"
-            echo "::add-path::$HOME/miniconda3/Scripts"
-          else
-            echo "::add-path::$HOME/miniconda3/bin"
-          fi
+          echo "::add-path::$HOME/miniconda3/bin"
 
       - name: Configure conda
         shell: bash
@@ -302,16 +290,9 @@ jobs:
 
       - name: Run tests
         shell: bash
+        working-directory: ./bokehjs
         run: |
-          pushd bokehjs
-          echo "$PATH"
-          python -c 'import yaml; print(yaml)'
-          python -c 'import bokeh; print(bokeh)'
-          node make test:size
-          node make test:unit
-          node make test:integration
-          #node make test
-          popd
+          node make test
 
       - name: Collect results
         if: always()
