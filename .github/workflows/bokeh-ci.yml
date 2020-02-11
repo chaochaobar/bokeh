@@ -264,7 +264,7 @@ jobs:
       - name: Install conda packages
         shell: bash
         run: |
-          conda install --yes --quiet --use-local python=${{ matrix.python-version }} bokeh $(python scripts/deps.py run test)
+          conda install --yes --quiet --use-local python=${{ matrix.python-version }} bokeh "nodejs=12.*"
           python -c 'import yaml; print(yaml)'
           python -c 'import bokeh; print(bokeh)'
 
