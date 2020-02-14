@@ -47,12 +47,13 @@ export async function add_document_from_session(websocket_url: string, token: st
     roots: {[key: string]: HTMLElement} = {}, use_for_title: boolean = false): Promise<View[]> {
   const args_string = window.location.search.substr(1)
   let session: ClientSession
+  const payload = parse_token(token)
   try {
     session = await _get_session(websocket_url, token, args_string)
   } catch (error) {
-    const session_id = parse_token(token).session_id
+    const session_id = payload.session_id
     logger.error(`Failed to load Bokeh session ${session_id}: ${error}`)
     throw error
   }
-  return add_document_standalone(session.document, element, roots, use_for_title)
+  return add_document_standalone(session.document, element, roots, use_for_title, payload.roots)
 }

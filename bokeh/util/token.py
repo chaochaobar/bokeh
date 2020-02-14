@@ -88,11 +88,11 @@ def generate_jwt_token(session_id: str,
             The session id to add to the token
 
         secret_key (str, optional) :
-            Secret key (default: value of BOKEH_SECRET_KEY environment varariable)
+            Secret key (default: value of BOKEH_SECRET_KEY environment variable)
 
         signed (bool, optional) :
             Whether to sign the session ID (default: value of BOKEH_SIGN_SESSIONS
-            envronment varariable)
+            environment variable)
 
         extra_payload (dict, optional) :
             Extra key/value pairs to include in the Bokeh session token
@@ -109,11 +109,38 @@ def generate_jwt_token(session_id: str,
         if "session_id" in extra_payload:
             raise RuntimeError("extra_payload for session tokens may not contain 'session_id'")
         payload.update(extra_payload)
+    return encode_token(payload, secret_key, signed)
+
+def encode_token(payload: Dict[str, Any],
+                 secret_key: Optional[bytes] = settings.secret_key_bytes(),
+                 signed: bool = settings.sign_sessions()) -> str:
+    """Encodes and signs the token payload.
+    Args:
+        payload (dict)
+            The token payload
+        secret_key (str, optional) :
+            Secret key (default: value of BOKEH_SECRET_KEY environment varariable)
+        signed (bool, optional) :
+            Whether to sign the session ID (default: value of BOKEH_SIGN_SESSIONS
+            enivironment varariable)
+    Returns:
+        str
+    """
     token = _base64_encode(json.dumps(payload))
     secret_key = _ensure_bytes(secret_key)
     if not signed:
         return token
     return token + '.' + _signature(token, secret_key)
+
+def decode_token(token: str) -> Any:
+    """Decodes a base64 encoded JWT token.
+    Args:
+        token (str):
+            A JWT token containing the session_id and other data.
+    Returns:
+       dict
+    """
+    return json.loads(_base64_decode(token.split('.')[0]))
 
 def get_session_id(token: str) -> Any:
     """Extracts the session id from a JWT token.
@@ -125,7 +152,7 @@ def get_session_id(token: str) -> Any:
     Returns:
        str
     """
-    decoded = json.loads(_base64_decode(token.split('.')[0]))
+    decoded = decode_token(token)
     return decoded['session_id']
 
 def get_token_payload(token: str) -> Any:
@@ -138,7 +165,7 @@ def get_token_payload(token: str) -> Any:
     Returns:
         dict
     """
-    decoded = json.loads(_base64_decode(token.split('.')[0]))
+    decoded = decode_token(token)
     del decoded['session_id']
     return decoded
 

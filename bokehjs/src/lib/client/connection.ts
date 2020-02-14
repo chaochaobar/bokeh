@@ -15,6 +15,7 @@ export type MessageResolver = (m: Message) => void
 export type PendingReply = {resolve: MessageResolver, reject: Rejecter}
 
 export type Token = {
+  roots: string[]
   session_expiry: number
   session_id: string
   [key: string]: unknown

@@ -24,6 +24,8 @@ from tornado.web import HTTPError, RequestHandler, authenticated
 # Bokeh imports
 from bokeh.util.token import (
     check_token_signature,
+    decode_token,
+    encode_token,
     generate_jwt_token,
     generate_session_id,
     get_session_id,
@@ -118,6 +120,16 @@ class SessionHandler(AuthMixin, RequestHandler):
             raise HTTPError(status_code=403, reason="Invalid token or session ID")
 
         session = await self.application_context.create_session_if_needed(session_id, self.request, token)
+
+        # Add roots to token to ensure roots match up across processes
+        document = session.document
+        payload = decode_token(token)
+        payload['roots'] = [root.ref['id'] for root in document.roots]
+        token = encode_token(payload,
+                             secret_key=self.application.secret_key,
+                             signed=self.application.sign_sessions)
+        session._token = token
+        session.document._session_context._token = token
 
         return session
 
